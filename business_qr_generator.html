@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business QR Code Generator & Digital Card</title>
+<style>
+  :root {
+    --navy: #0818A8;
+    --navy-dark: #051075;
+    --navy-light: #2537d8;
+    --lavender: #E6E8FF;
+    --sky: #A7C7E7;
+    --ink: #1a1d2e;
+    --ink-muted: #5e647e;
+    --bg: #f3f5fb;
+    --panel-bg: #ffffff;
+    --border: #dcdfeShow;
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(8, 24, 168, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* Header */
+  .top-bar {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, #3b4cca 100%);
+    color: white;
+    padding: 28px 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(8, 24, 168, 0.15);
+  }
+  .top-bar h1 {
+    margin: 0 0 6px;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .top-bar p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .badge-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  /* Main Layout */
+  .layout {
+    max-width: 1120px;
+    margin: 24px auto;
+    padding: 0 16px 40px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.85fr);
+    gap: 24px;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(220, 225, 240, 0.6);
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    color: var(--navy-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2 .step-num {
+    background: var(--lavender);
+    color: var(--navy);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  /* Form Elements */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #475069;
+    margin-bottom: 6px;
+  }
+  input, textarea, select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d4d8e8;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    background: #fafbfe;
+    transition: all 0.2s ease;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--navy);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(8, 24, 168, 0.12);
+  }
+
+  .file-drop {
+    border: 2px dashed #c0c6e0;
+    background: #f8f9fe;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .file-drop:hover {
+    border-color: var(--navy);
+    background: #f0f3ff;
+  }
+  .file-drop input[type="file"] {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .logo-preview-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 8px;
+    background: #f0f3ff;
+    border-radius: 10px;
+  }
+  .logo-preview-box img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px;
+    border: 1px solid #dcdfe8;
+  }
+  .logo-preview-box span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    flex: 1;
+    word-break: break-all;
+  }
+
+  .hint {
+    color: var(--ink-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+
+  /* Buttons */
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    font-size: 15px;
+    box-shadow: 0 4px 14px rgba(8, 24, 168, 0.25);
+  }
+  .btn-primary:hover {
+    background: var(--navy-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(8, 24, 168, 0.35);
+  }
+  .btn-secondary {
+    background: var(--lavender);
+    color: var(--navy-dark);
+  }
+  .btn-secondary:hover {
+    background: #d8dbff;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #c0c6e0;
+    color: var(--ink);
+  }
+  .btn-outline:hover {
+    background: #f0f3ff;
+    border-color: var(--navy);
+  }
+
+  /* Right Panel QR Preview */
+  .preview-panel {
+    position: sticky;
+    top: 20px;
+    text-align: center;
+  }
+  #brandPreview {
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--navy-dark);
+    overflow-wrap: anywhere;
+  }
+  #detailsPreview {
+    color: var(--ink-muted);
+    font-size: 13px;
+    margin: 4px 0 16px;
+    white-space: pre-line;
+  }
+
+  #qrWrap {
+    min-height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    border: 2px dashed #cbd0e3;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 0 auto 16px;
+    position: relative;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+  }
+  #qrWrap canvas, #qrWrap img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .actions button {
+    width: 100%;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+  .action-full {
+    grid-column: span 2;
+  }
+
+  .status-msg {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #f0f3ff;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  /* Standalone Digital Business Card View (When Scanned) */
+  #cardViewContainer {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #091540 0%, #122266 50%, #1d3399 100%);
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+
+  .card-screen {
+    max-width: 440px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .card-header-bg {
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
+    height: 110px;
+    position: relative;
+  }
+
+  .card-logo-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: 4px solid #ffffff;
+  }
+  .card-logo-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  .card-body {
+    padding: 55px 22px 28px;
+    text-align: center;
+  }
+
+  .card-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .card-subtitle {
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+  .card-person {
+    display: inline-block;
+    background: var(--lavender);
+    color: var(--navy-dark);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* Quick Action Buttons Grid */
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    gap: 6px;
+    transition: transform 0.2s ease;
+  }
+  .action-item:hover { transform: translateY(-2px); }
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .icon-call { background: #10B981; }
+  .icon-wa { background: #25D366; }
+  .icon-mail { background: #3B82F6; }
+  .icon-map { background: #F59E0B; }
+
+  /* Detail Items List */
+  .details-list {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .detail-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f6f8fd;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid #e7ebf7;
+    transition: all 0.2s ease;
+  }
+  .detail-card:hover {
+    background: #eef2ff;
+    border-color: var(--navy-light);
+  }
+  .detail-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--navy);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+  }
+  .detail-text {
+    flex: 1;
+    overflow: hidden;
+  }
+  .detail-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #7882a0;
+  }
+  .detail-val {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .save-vcard-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--navy), #3042e0);
+    color: white;
+    padding: 14px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(8, 24, 168, 0.3);
+  }
+  .save-vcard-btn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+  }
+
+  .card-footer {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #9098b5;
+  }
+  .card-footer a {
+    color: var(--navy);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  @media(max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+    .preview-panel { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<!-- GENERATOR INTERFACE -->
+<div id="generatorApp">
+  <header class="top-bar">
+    <span class="badge-tag">Center Logo & Digital Card</span>
+    <h1>Business QR Code Generator</h1>
+    <p>Generate scannable QR codes with your company logo in the center that open a responsive digital card UI on smartphones.</p>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT INPUT PANEL -->
+    <section class="panel">
+      <h2><span class="step-num">1</span> Business & Contact Info</h2>
+
+      <div class="form-group">
+        <label for="business">Business / Office Name *</label>
+        <input id="business" placeholder="e.g. ABC Traders Pvt Ltd" required value="ABC Traders">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="person">Contact Person</label>
+          <input id="person" placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label for="tagline">Tagline / Designation</label>
+          <input id="tagline" placeholder="e.g. Managing Director">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="phone">Mobile / Phone</label>
+          <input id="phone" type="tel" placeholder="+91 98765 43210" value="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label for="whatsapp">WhatsApp Number</label>
+          <input id="whatsapp" type="tel" placeholder="+91 98765 43210">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" placeholder="contact@abctraders.com">
+      </div>
+
+      <div class="form-group">
+        <label for="address">Office / Shop Address</label>
+        <textarea id="address" rows="2" placeholder="Building No, Street, City, Pincode"></textarea>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="website">Website URL</label>
+          <input id="website" type="url" placeholder="https://abctraders.com">
+        </div>
+        <div class="form-group">
+          <label for="maps">Google Maps Link</label>
+          <input id="maps" type="url" placeholder="https://maps.google.com/?q=...">
+        </div>
+      </div>
+
+      <h2 style="margin-top:24px"><span class="step-num">2</span> Social Media Profiles</h2>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="instagram">Instagram Link</label>
+          <input id="instagram" type="url" placeholder="https://instagram.com/yourpage">
+        </div>
+        <div class="form-group">
+          <label for="youtube">YouTube Link</label>
+          <input id="youtube" type="url" placeholder="https://youtube.com/@yourchannel">
+        </div>
+        <div class="form-group">
+          <label for="facebook">Facebook Link</label>
+          <input id="facebook" type="url" placeholder="https://facebook.com/yourpage">
+        </div>
+        <div class="form-group">
+          <label for="linkedin">LinkedIn Link</label>
+          <input id="linkedin" type="url" placeholder="https://linkedin.com/company/yourpage">
+        </div>
+      </div>
+
+      <h2 style="margin-top:24px"><span class="step-num">3</span> Center Logo & Customization</h2>
+      
+      <div class="form-group">
+        <label>Company Logo</label>
+        <div class="file-drop" id="dropArea">
+          <input type="file" id="logoFile" accept="image/*">
+          <div id="dropText">📁 Click or drag logo image file here</div>
+        </div>
+        <div class="logo-preview-box" id="logoPreviewBox" style="display:none;">
+          <img id="logoPreviewImg" src="" alt="Logo">
+          <span id="logoFileName">logo.png</span>
+          <button type="button" class="btn-outline" id="removeLogoBtn" style="padding:4px 8px; font-size:11px;">Remove</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="logoShape">Logo Shape Badge</label>
+          <select id="logoShape">
+            <option value="circle">Circle Badge</option>
+            <option value="rounded">Rounded Square</option>
+            <option value="square">Square</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="qrColor">QR Module Color</label>
+          <input type="color" id="qrColor" value="#0818A8">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="targetUrl">Web URL for Scanned QR (Card Host)</label>
+        <input id="targetUrl" type="url" placeholder="https://yourdomain.com/index.html">
+        <p class="hint">💡 Scanning the QR code will open your Digital Card at this URL. If left empty, it auto-detects current page address.</p>
+      </div>
+
+      <button class="btn-primary" id="generateBtn">🚀 Generate QR Code with Center Logo</button>
+    </section>
+
+    <!-- RIGHT PREVIEW PANEL -->
+    <section class="panel preview-panel">
+      <h2>QR Code Preview</h2>
+      <div id="brandPreview">ABC Traders</div>
+      <div id="detailsPreview">Business details preview</div>
+
+      <div id="qrWrap">
+        <span class="hint">Fill details & click Generate to build QR Code.</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="downloadBtn" disabled>💾 Download PNG</button>
+        <button class="btn-secondary" id="printBtn" disabled>🖨️ Print Standee</button>
+        <button class="btn-outline action-full" id="previewCardBtn">👁️ Preview Scanned Mobile Screen</button>
+      </div>
+
+      <div class="status-msg" id="status">Ready to generate high-res scannable QR code.</div>
+    </section>
+  </main>
+</div>
+
+<!-- DIGITAL BUSINESS CARD VIEW (RENDERED WHEN SCANNED OR PREVIEWED) -->
+<div id="cardViewContainer">
+  <div style="max-width:440px; margin:0 auto 12px; display:flex; justify-content:space-between; align-items:center;">
+    <button class="btn-outline" id="backToGenBtn" style="color:white; border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.1);">← Back to Generator</button>
+    <span style="color:white; font-size:12px; opacity:0.8;">Scanned Mobile View</span>
+  </div>
+
+  <div class="card-screen">
+    <div class="card-header-bg">
+      <div class="card-logo-avatar" id="cardLogoWrap">
+        <img id="cardLogoImg" src="" alt="Company Logo">
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h1 class="card-title" id="cardTitle">ABC Traders</h1>
+      <div class="card-subtitle" id="cardSubtitle">Wholesale & Retail</div>
+      <div class="card-person" id="cardPerson" style="display:none;">John Doe</div>
+
+      <!-- Quick Actions Grid -->
+      <div class="action-grid" id="actionGrid">
+        <a href="#" class="action-item" id="actCall">
+          <div class="action-icon icon-call">📞</div>
+          <span>Call</span>
+        </a>
+        <a href="#" class="action-item" id="actWa">
+          <div class="action-icon icon-wa">💬</div>
+          <span>WhatsApp</span>
+        </a>
+        <a href="#" class="action-item" id="actMail">
+          <div class="action-icon icon-mail">✉️</div>
+          <span>Email</span>
+        </a>
+        <a href="#" class="action-item" id="actMap">
+          <div class="action-icon icon-map">📍</div>
+          <span>Location</span>
+        </a>
+      </div>
+
+      <!-- Detail Card List -->
+      <div class="details-list" id="detailsList">
+        <!-- Dynamic items rendered here -->
+      </div>
+
+      <!-- Save vCard Button -->
+      <button class="save-vcard-btn" id="saveVCardBtn">📇 Save Contact to Phone</button>
+
+      <div class="card-footer">
+        Powered by <a href="javascript:void(0)" onclick="closeCardView()">Business QR Generator</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let currentLogoDataUrl = null;
+let currentCardData = null;
+let isGenerated = false;
+
+// Default Placeholder Logo SVG (Building/Business Icon)
+const DEFAULT_LOGO_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%230818A8"><rect width="100" height="100" rx="20" fill="%230818A8"/><path d="M30 75V35L50 20L70 35V75H55V55H45V75H30Z" fill="white"/><circle cx="50" cy="42" r="6" fill="%230818A8"/></svg>`;
+
+// Initialize target URL field with current location without hash
+window.addEventListener('DOMContentLoaded', () => {
+  const cleanLoc = window.location.href.split('#')[0];
+  $("targetUrl").value = cleanLoc.startsWith('http') ? cleanLoc : '';
+
+  // Check if opened via scanned QR hash link (#card=...)
+  if (window.location.hash.startsWith('#card=')) {
+    try {
+      const encoded = window.location.hash.substring(6);
+      const decodedData = decodeCardData(encoded);
+      if (decodedData) {
+        showCardView(decodedData);
+        return;
+      }
+    } catch(e) {
+      console.error("Error parsing QR card hash", e);
+    }
+  }
+
+  // Generate initial preview
+  generateQR();
+});
+
+// Logo File Upload Handling
+$("logoFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize logo to max 150x150 for compact encoding & crisp rendering
+      const maxDim = 150;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+        else { w = Math.round((w * maxDim) / h); h = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      currentLogoDataUrl = canvas.toDataURL("image/png");
+
+      $("logoPreviewImg").src = currentLogoDataUrl;
+      $("logoFileName").textContent = file.name;
+      $("logoPreviewBox").style.display = "flex";
+      generateQR();
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+$("removeLogoBtn").addEventListener("click", () => {
+  currentLogoDataUrl = null;
+  $("logoFile").value = "";
+  $("logoPreviewBox").style.display = "none";
+  generateQR();
+});
+
+function cleanUrl(val) {
+  const v = val.trim();
+  if (!v) return "";
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  return "https://" + v;
+}
+
+function getFormData() {
+  const business = $("business").value.trim();
+  if (!business) throw new Error("Please enter your Business / Office Name.");
+
+  return {
+    business,
+    tagline: $("tagline").value.trim(),
+    person: $("person").value.trim(),
+    phone: $("phone").value.trim(),
+    whatsapp: $("whatsapp").value.trim() || $("phone").value.trim(),
+    email: $("email").value.trim(),
+    address: $("address").value.trim(),
+    website: cleanUrl($("website").value),
+    maps: cleanUrl($("maps").value),
+    instagram: cleanUrl($("instagram").value),
+    youtube: cleanUrl($("youtube").value),
+    facebook: cleanUrl($("facebook").value),
+    linkedin: cleanUrl($("linkedin").value),
+    logo: currentLogoDataUrl || null
+  };
+}
+
+function encodeCardData(data) {
+  try {
+    const jsonStr = JSON.stringify(data);
+    return btoa(encodeURIComponent(jsonStr));
+  } catch(e) {
+    console.error(e);
+    return "";
+  }
+}
+
+function decodeCardData(encodedStr) {
+  try {
+    const jsonStr = decodeURIComponent(atob(encodedStr));
+    return JSON.parse(jsonStr);
+  } catch(e) {
+    console.error(e);
+    return null;
+  }
+}
+
+function generateQR() {
+  try {
+    if (typeof QRCode === "undefined") {
+      throw new Error("QR Library loading... check internet connection.");
+    }
+
+    const data = getFormData();
+    currentCardData = data;
+
+    $("brandPreview").textContent = data.business;
+    $("detailsPreview").textContent = [
+      data.tagline,
+      data.person ? "Contact: " + data.person : "",
+      data.phone,
+      data.address
+    ].filter(Boolean).join("\n") || "Scannable Business Card";
+
+    // Encode data into URL hash
+    const encoded = encodeCardData(data);
+    let baseUrl = $("targetUrl").value.trim();
+    if (!baseUrl) {
+      baseUrl = window.location.href.split('#')[0];
+    }
+    const finalQrUrl = baseUrl + "#card=" + encoded;
+
+    const qrColor = $("qrColor").value || "#0818A8";
+
+    // Clear previous QR element
+    $("qrWrap").innerHTML = "";
+
+    // Generate Base QR with High Error Correction (Required for Center Logo)
+    const qrDiv = document.createElement("div");
+    new QRCode(qrDiv, {
+      text: finalQrUrl,
+      width: 280,
+      height: 280,
+      colorDark: qrColor,
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Wait for canvas element to render inside QRCode container
+    setTimeout(() => {
+      const qrCanvas = qrDiv.querySelector("canvas");
+      if (!qrCanvas) return;
+
+      // Draw Center Logo onto canvas
+      const logoImg = new Image();
+      logoImg.crossOrigin = "Anonymous";
+      logoImg.onload = () => {
+        applyLogoToCanvas(qrCanvas, logoImg);
+        finishQRRender(qrCanvas);
+      };
+      logoImg.onerror = () => {
+        // If custom logo fails, finish without logo overlay
+        finishQRRender(qrCanvas);
+      };
+      logoImg.src = data.logo || DEFAULT_LOGO_SVG;
+    }, 50);
+
+  } catch(e) {
+    $("status").textContent = e.message;
+  }
+}
+
+function applyLogoToCanvas(canvas, logoImg) {
+  const ctx = canvas.getContext("2d");
+  const size = canvas.width;
+  const logoSize = Math.round(size * 0.22); // 22% of QR width
+  const center = size / 2;
+  const pos = center - (logoSize / 2);
+  const shape = $("logoShape").value;
+
+  ctx.save();
+
+  // Draw background badge (White shadow badge to hide underlying QR dots)
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+  ctx.shadowBlur = 10;
+
+  const badgePadding = 6;
+  const badgeSize = logoSize + badgePadding;
+  const badgePos = center - (badgeSize / 2);
+
+  if (shape === "circle") {
+    ctx.beginPath();
+    ctx.arc(center, center, badgeSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Clip image in inner circle
+    ctx.beginPath();
+    ctx.arc(center, center, logoSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+  } else if (shape === "rounded") {
+    const radius = 12;
+    drawRoundedRect(ctx, badgePos, badgePos, badgeSize, badgeSize, radius);
+    ctx.fill();
+
+    drawRoundedRect(ctx, pos, pos, logoSize, logoSize, radius - 2);
+    ctx.clip();
+  } else {
+    ctx.fillRect(badgePos, badgePos, badgeSize, badgeSize);
+    ctx.beginPath();
+    ctx.rect(pos, pos, logoSize, logoSize);
+    ctx.clip();
+  }
+
+  // Draw Logo Image
+  ctx.drawImage(logoImg, pos, pos, logoSize, logoSize);
+  ctx.restore();
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function finishQRRender(canvas) {
+  $("qrWrap").innerHTML = "";
+  const displayImg = document.createElement("img");
+  displayImg.src = canvas.toDataURL("image/png");
+  displayImg.alt = "Business QR Code with Logo";
+  displayImg.style.maxWidth = "100%";
+  displayImg.style.height = "auto";
+  displayImg.id = "finalQrImage";
+  $("qrWrap").appendChild(displayImg);
+
+  $("downloadBtn").disabled = false;
+  $("printBtn").disabled = false;
+  $("status").textContent = "✨ QR Code with center logo ready! Scan with phone camera to open card.";
+  isGenerated = true;
+}
+
+$("generateBtn").addEventListener("click", generateQR);
+$("logoShape").addEventListener("change", generateQR);
+$("qrColor").addEventListener("change", generateQR);
+
+// Download High-Res PNG
+$("downloadBtn").addEventListener("click", () => {
+  if (!isGenerated || !currentCardData) return;
+  const img = $("finalQrImage");
+  if (!img) return;
+
+  const a = document.createElement("a");
+  a.href = img.src;
+  a.download = (currentCardData.business.replace(/[^a-z0-9_-]+/gi, "_") || "business") + "_QR_Card.png";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+
+// Print Display Flyer / Standee
+$("printBtn").addEventListener("click", () => {
+  if (!isGenerated || !currentCardData) return;
+  const img = $("finalQrImage");
+  if (!img) return;
+
+  const title = currentCardData.business;
+  const subtitle = currentCardData.tagline || "Scan for Business Contact & Links";
+  const logo = currentCardData.logo || DEFAULT_LOGO_SVG;
+
+  const w = window.open("", "_blank");
+  if (!w) {
+    alert("Please allow pop-ups to print the QR flyer.");
+    return;
+  }
+
+  w.document.write(`
+    <!doctype html>
+    <html>
+    <head>
+      <title>Print QR Standee - ${title}</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 40px; color: #1a1d2e; }
+        .standee { max-width: 480px; margin: 0 auto; border: 3px solid #0818A8; border-radius: 24px; padding: 36px 24px; }
+        .logo { width: 70px; height: 70px; border-radius: 50%; object-fit: contain; margin-bottom: 10px; }
+        h1 { margin: 10px 0 4px; font-size: 26px; color: #0818A8; }
+        p { color: #5e647e; margin: 0 0 20px; font-size: 15px; }
+        .qr { width: 280px; height: 280px; margin: 0 auto 20px; }
+        .footer-tag { font-size: 13px; font-weight: bold; background: #e6e8ff; color: #0818A8; padding: 8px 16px; border-radius: 20px; display: inline-block; }
+      </style>
+    </head>
+    <body>
+      <div class="standee">
+        <img class="logo" src="${logo}" alt="Logo">
+        <h1>${title}</h1>
+        <p>${subtitle}</p>
+        <img class="qr" src="${img.src}" alt="QR Code">
+        <br>
+        <div class="footer-tag">📱 Scan with any smartphone camera</div>
+      </div>
+    </body>
+    </html>
+  `);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 400);
+});
+
+// Mobile Screen Preview & Digital Card Handling
+$("previewCardBtn").addEventListener("click", () => {
+  if (currentCardData) {
+    showCardView(currentCardData);
+  }
+});
+
+function showCardView(data) {
+  $("generatorApp").style.display = "none";
+  $("cardViewContainer").style.display = "block";
+
+  $("cardTitle").textContent = data.business || "Business Name";
+  $("cardSubtitle").textContent = data.tagline || (data.address ? data.address.split('\n')[0] : "Digital Business Card");
+
+  if (data.person) {
+    $("cardPerson").textContent = data.person;
+    $("cardPerson").style.display = "inline-block";
+  } else {
+    $("cardPerson").style.display = "none";
+  }
+
+  // Logo
+  $("cardLogoImg").src = data.logo || DEFAULT_LOGO_SVG;
+
+  // Quick Action Buttons
+  setupAction("actCall", data.phone ? "tel:" + data.phone.replace(/[^0-9+]/g, '') : null);
+  setupAction("actWa", data.whatsapp ? "https://wa.me/" + data.whatsapp.replace(/[^0-9]/g, '') : null);
+  setupAction("actMail", data.email ? "mailto:" + data.email : null);
+  setupAction("actMap", data.maps || (data.address ? "https://maps.google.com/?q=" + encodeURIComponent(data.address) : null));
+
+  // Details List
+  const list = $("detailsList");
+  list.innerHTML = "";
+
+  if (data.phone) addDetailItem("📞 Mobile", data.phone, "tel:" + data.phone.replace(/[^0-9+]/g, ''));
+  if (data.email) addDetailItem("✉️ Email", data.email, "mailto:" + data.email);
+  if (data.website) addDetailItem("🌐 Website", data.website, data.website);
+  if (data.address) addDetailItem("📍 Address", data.address.replace(/\n/g, ', '), data.maps || null);
+  if (data.instagram) addDetailItem("📸 Instagram", data.instagram, data.instagram);
+  if (data.youtube) addDetailItem("▶️ YouTube", data.youtube, data.youtube);
+  if (data.facebook) addDetailItem("📘 Facebook", data.facebook, data.facebook);
+  if (data.linkedin) addDetailItem("💼 LinkedIn", data.linkedin, data.linkedin);
+
+  // Setup vCard download
+  $("saveVCardBtn").onclick = () => downloadVCard(data);
+}
+
+function setupAction(elemId, linkUrl) {
+  const el = $(elemId);
+  if (linkUrl) {
+    el.href = linkUrl;
+    el.target = linkUrl.startsWith('http') ? '_blank' : '_self';
+    el.style.opacity = "1";
+    el.style.pointerEvents = "auto";
+  } else {
+    el.href = "#";
+    el.style.opacity = "0.3";
+    el.style.pointerEvents = "none";
+  }
+}
+
+function addDetailItem(label, val, linkUrl) {
+  const item = document.createElement(linkUrl ? "a" : "div");
+  item.className = "detail-card";
+  if (linkUrl) {
+    item.href = linkUrl;
+    item.target = linkUrl.startsWith('http') ? '_blank' : '_self';
+  }
+
+  item.innerHTML = `
+    <div class="detail-icon">${label.split(' ')[0]}</div>
+    <div class="detail-text">
+      <div class="detail-label">${label.substring(label.indexOf(' ') + 1)}</div>
+      <div class="detail-val">${val}</div>
+    </div>
+  `;
+  $("detailsList").appendChild(item);
+}
+
+function closeCardView() {
+  $("cardViewContainer").style.display = "none";
+  $("generatorApp").style.display = "block";
+}
+
+$("backToGenBtn").addEventListener("click", closeCardView);
+
+// Generate & Download vCard (.vcf)
+function downloadVCard(data) {
+  let vcard = "BEGIN:VCARD\nVERSION:3.0\n";
+  vcard += `ORG:${data.business}\n`;
+  vcard += `FN:${data.person || data.business}\n`;
+  if (data.person) vcard += `N:${data.person};;;;\n`;
+  if (data.phone) vcard += `TEL;TYPE=CELL,VOICE:${data.phone}\n`;
+  if (data.email) vcard += `EMAIL;TYPE=INTERNET:${data.email}\n`;
+  if (data.website) vcard += `URL:${data.website}\n`;
+  if (data.address) vcard += `ADR;TYPE=WORK:;;${data.address.replace(/\n/g, ', ')};;;;\n`;
+  if (data.instagram) vcard += `X-SOCIALPROFILE;TYPE=instagram:${data.instagram}\n`;
+  if (data.youtube) vcard += `X-SOCIALPROFILE;TYPE=youtube:${data.youtube}\n`;
+  vcard += "END:VCARD";
+
+  const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (data.business || "contact").replace(/[^a-z0-9_-]+/gi, "_") + ".vcf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
